@@ -1,0 +1,117 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df=pd.read_csv('sales_data.csv')
+print(df.head())
+
+print(df.isnull().sum)
+print(df.duplicated().sum)
+df.drop_duplicates(inplace=True)
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+print(df.info())
+
+top_products = df.groupby("Product")["Sales"].sum().sort_values(ascending=False).head(5)    #top 5 product sale of company
+print('Top 5 products of sale',top_products)
+
+
+total_revenue=df['Sales'].sum()   # total sale of company
+total_profit=df['Profit'].sum()   #total profit of company
+
+print("total revenue is: ",total_revenue)
+print("total profit is: ",total_profit)
+
+
+avg_order=df['Sales'].mean()    #avg order of product
+print("average_order: ",avg_order)
+
+
+customer_sales=df.groupby("Customer Type")['Sales'].sum()    #comparrison of B2B vs B2C sales
+print("B2B vs B2C Sales: ",customer_sales)
+
+
+avg_profit_by_discount = df.groupby("Discount")["Profit"].mean()  
+print("Discount vs Profit:\n", avg_profit_by_discount)
+
+region_product_sales = df.groupby(["Region", "Product"])["Sales"].sum().reset_index()  # region-wise product sale
+print(region_product_sales)
+
+
+
+
+#Top 5 product by company
+import seaborn as sns
+df=pd.read_csv('sales_data.csv')
+sns.set_style("darkgrid")
+print(df.head())
+plt.figure(figsize=(12,8),facecolor='lightgray')
+sns.barplot(x=top_products.index, y=top_products.values , palette="muted" , width=0.4 , alpha=0.8 , edgecolor='black' , linewidth=3 ,linestyle='--')
+plt.xlabel("Product",fontsize=15,fontweight='semibold',fontname='arial',color='darkblue')
+plt.ylabel("Total_sale",fontsize=16,fontweight='bold',fontname='arial',color='darkblue')
+plt.title("Top 5 Best-Selling Products",fontsize=18, fontweight='bold',fontname='Calibri',color='darkblue')
+plt.xticks(fontsize=13, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.yticks(fontsize=13, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.show()   
+
+
+#B2b vs B2C comparison....
+import seaborn as sns
+df=pd.read_csv('sales_data.csv')
+plt.figure(figsize=(8, 6),facecolor='lightgray')
+colors = ["royalblue", "seagreen"]
+explode = [0.2, 0] 
+plt.pie(customer_sales.values, labels=customer_sales.index, autopct='%d%%', colors=colors, startangle=180, explode=explode, shadow=True,textprops={'fontsize': 15, 'color': 'black', 'fontweight': 'bold'}, wedgeprops={'edgecolor': 'darkred', 'linewidth': 3, 'linestyle': '-'})
+plt.title("B2B vs B2C Sales Distribution", fontsize=16, fontweight='bold', color='darkblue',fontname='calibri')
+plt.show()
+
+
+#discount vs profit....
+import seaborn as sns
+df=pd.read_csv('sales_data.csv')
+plt.figure(figsize=(10, 6),facecolor='lightgray')
+sns.set_style("darkgrid")
+sns.lineplot(x=avg_profit_by_discount.index, y=avg_profit_by_discount.values, marker="*",markersize=15, color="red",linestyle='-')
+plt.xlabel("Discount (%)",fontsize=15,fontweight='semibold',fontname='arial',color='darkblue')
+plt.ylabel("Profit ($)",fontsize=15,fontweight='bold',fontname='arial',color='darkblue')
+plt.title("Discount vs Profit",fontsize=18, fontweight='bold',fontname='Calibri',color='darkblue')
+plt.xticks(fontsize=12, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.yticks(fontsize=12, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.show()
+
+
+
+#product vs sale
+import matplotlib.pyplot as plt
+import seaborn as sns
+plt.figure(figsize=(12, 8), facecolor='aliceblue')
+sns.set_style("darkgrid")
+sns.swarmplot(data=region_product_sales, x="Sales",y="Product", size=10, hue="Region",  palette={'orange','blue','red','green'},dodge=True,)
+plt.xlabel("Sale(%)",fontsize=15,fontweight='semibold',fontname='arial',color='darkblue')
+plt.ylabel("Product",fontsize=15,fontweight='semibold',fontname='arial',color='darkblue')
+plt.title("Sale vs Product",fontsize=18, fontweight='bold',fontname='Calibri',color='darkblue')
+plt.xticks(fontsize=11, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.yticks(fontsize=11, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.grid(True,linestyle='--',alpha=0.5)
+plt.show()
+
+
+
+#month trend sale and profit
+df['Order Date'] = pd.to_datetime(df['Order Date'])
+df['Year-Month'] = df['Order Date'].dt.to_period('M').astype(str)
+monthly_trend = df.groupby('Year-Month')[['Sales', 'Profit']].sum().reset_index()
+plt.figure(figsize=(12, 7),facecolor='aliceblue')
+sns.set_style("darkgrid")
+plt.plot(monthly_trend['Year-Month'], monthly_trend['Sales'], marker='o',markersize=11,label='Sales', color='orange')
+plt.plot(monthly_trend['Year-Month'], monthly_trend['Profit'], marker='d',markersize=12, label='Profit', color='red')
+
+plt.xlabel("Sale(%)",fontsize=14,fontweight='semibold',fontname='arial',color='darkblue')
+plt.ylabel("Profit($)",fontsize=14,fontweight='semibold',fontname='arial',color='darkblue')
+plt.title("Monthly trend analysis",fontsize=18, fontweight='bold',fontname='Calibri',color='darkblue')
+plt.xticks(rotation=45,fontsize=11, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.yticks(fontsize=11, fontweight='semibold',fontname='Calibri',color='darkred')
+plt.legend()
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.show()
